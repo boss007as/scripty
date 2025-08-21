@@ -1574,7 +1574,7 @@ local CurrencyStatus = Tabs.HatchTab:Paragraph({
 -- Hatch World Selection
 local HatchWorldDropdown = Tabs.HatchTab:Dropdown({
     Title = "Hatch World",
-    Desc = "Select world to hatch eggs from",
+    Desc = "Select world to hatch eggs from (Loading worlds...)",
     Icon = "globe",
     Values = getHatchWorlds(),
     Value = "",
@@ -1794,7 +1794,7 @@ local ModeStatus = Tabs.GamemodeTab:Paragraph({
 -- Gamemode Selection
 local GamemodeDropdown = Tabs.GamemodeTab:Dropdown({
     Title = "Select Gamemodes",
-    Desc = "Choose which gamemodes to auto-join when they open (can select multiple)",
+    Desc = "Choose which gamemodes to auto-join when they open (Loading gamemodes...)",
     Icon = "gamepad-2",
     Values = getAvailableGamemodes(),
     Value = {},
@@ -2141,4 +2141,54 @@ spawn(function()
     myConfig:Load()
 end)
 
-print("Anime Hunters script loaded successfully!")
+-- Delayed initialization to refresh dropdowns with game data
+spawn(function()
+    wait(3) -- Wait longer for game data to load
+    
+    WindUI:Notify({
+        Title = "Initializing Features",
+        Content = "Loading Hatch and Auto Join data...",
+        Icon = "loader",
+        Duration = 2,
+    })
+    
+    -- Refresh hatch worlds dropdown
+    local hatchWorlds = getHatchWorlds()
+    if #hatchWorlds > 0 then
+        HatchWorldDropdown:Refresh(hatchWorlds)
+        WindUI:Notify({
+            Title = "Hatch System Ready",
+            Content = "Found " .. #hatchWorlds .. " hatch worlds! Auto Hatch is now available.",
+            Icon = "egg",
+            Duration = 4,
+        })
+    else
+        WindUI:Notify({
+            Title = "Hatch System Warning",
+            Content = "No hatch worlds found. Click 'Refresh Hatch Worlds' to try again.",
+            Icon = "alert-triangle",
+            Duration = 6,
+        })
+    end
+    
+    -- Refresh gamemodes dropdown
+    local gamemodes = getAvailableGamemodes()
+    if #gamemodes > 0 then
+        GamemodeDropdown:Refresh(gamemodes)
+        WindUI:Notify({
+            Title = "Auto Join Ready",
+            Content = "Found " .. #gamemodes .. " gamemodes! Auto Join is now available.",
+            Icon = "gamepad-2",
+            Duration = 4,
+        })
+    else
+        WindUI:Notify({
+            Title = "Auto Join Warning",
+            Content = "No gamemodes found. Click 'Refresh Gamemodes' to try again.",
+            Icon = "alert-triangle",
+            Duration = 6,
+        })
+    end
+end)
+
+print("Anime Hunters script loaded successfully! Hatch and Auto Join features will initialize in a few seconds.")
