@@ -295,23 +295,33 @@ end
 -- Get available gamemodes
 local function getAvailableGamemodes()
     local modes = {}
-    local gamemodesFolder = game:GetService("ReplicatedStorage"):FindFirstChild("Gamemodes")
+    local replicatedStorage = game:GetService("ReplicatedStorage")
+    
+    -- Wait for ReplicatedStorage to be ready
+    local gamemodesFolder = replicatedStorage:WaitForChild("Gamemodes", 10)
     if gamemodesFolder then
         for _, mode in pairs(gamemodesFolder:GetChildren()) do
             if mode:IsA("Folder") then
                 table.insert(modes, mode.Name)
             end
         end
+    else
+        -- Fallback if Gamemodes folder doesn't exist
+        warn("Gamemodes folder not found in ReplicatedStorage")
     end
+    
     return modes
 end
 
 -- Get hatch worlds from ReplicatedStorage.Shared.Stars
 local function getHatchWorlds()
     local worlds = {}
-    local starsModule = game:GetService("ReplicatedStorage"):FindFirstChild("Shared")
-    if starsModule then
-        starsModule = starsModule:FindFirstChild("Stars")
+    local replicatedStorage = game:GetService("ReplicatedStorage")
+    
+    -- Wait for ReplicatedStorage to be ready
+    local sharedFolder = replicatedStorage:WaitForChild("Shared", 10)
+    if sharedFolder then
+        local starsModule = sharedFolder:WaitForChild("Stars", 5)
         if starsModule then
             local success, starsData = pcall(function()
                 return require(starsModule)
@@ -321,9 +331,16 @@ local function getHatchWorlds()
                 for worldName, _ in pairs(starsData) do
                     table.insert(worlds, worldName)
                 end
+            else
+                warn("Failed to load Stars data from ReplicatedStorage.Shared.Stars")
             end
+        else
+            warn("Stars module not found in ReplicatedStorage.Shared")
         end
+    else
+        warn("Shared folder not found in ReplicatedStorage")
     end
+    
     return worlds
 end
 
